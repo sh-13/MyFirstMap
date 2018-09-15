@@ -18,6 +18,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.util.List;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private Marker marker;
 
     LocationManager locationManager;
 
@@ -34,7 +36,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -53,6 +55,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
+                    if (marker != null)
+                        marker.remove();
                     double latitude = location.getLatitude();
                     double longitude = location.getLongitude();
                     LatLng latLng = new LatLng(latitude, longitude);
@@ -62,7 +66,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         String string = addresses.get(0).getLocality() + ", ";
                         string += addresses.get(0).getPostalCode() + ", ";
                         string += addresses.get(0).getCountryName();
-                        mMap.addMarker(new MarkerOptions().position(latLng).title(string));
+                        marker = mMap.addMarker(new MarkerOptions().position(latLng).title(string));
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -90,6 +94,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
+                    if (marker != null)
+                        marker.remove();
                     double latitude = location.getLatitude();
                     double longitude = location.getLongitude();
                     LatLng latLng = new LatLng(latitude, longitude);
@@ -98,7 +104,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
                         String string = addresses.get(0).getCountryName() + " ";
                         string += addresses.get(0).getLocality();
-                        mMap.addMarker(new MarkerOptions().position(latLng).title(string));
+                        marker = mMap.addMarker(new MarkerOptions().position(latLng).title(string));
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 19.5f));
                     } catch (IOException e) {
                         e.printStackTrace();
